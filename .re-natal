@@ -5,7 +5,8 @@
     "dev": "env/dev",
     "prod": "env/prod"
   },
-  "modules": [],
+  "modules": [
+  ],
   "imageDirs": [
     "images"
   ],

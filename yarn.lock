@@ -3616,6 +3616,10 @@ react-native-gifted-chat@^0.3.0:
     shallowequal "1.0.2"
     uuid "3.1.0"
 
+react-native-google-analytics-bridge@^5.4.1:
+  version "5.4.1"
+  resolved "https://registry.yarnpkg.com/react-native-google-analytics-bridge/-/react-native-google-analytics-bridge-5.4.1.tgz#fd5dacb86436b7e08f1972a8205229ada2ea2abf"
+
 react-native-invertible-scroll-view@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/react-native-invertible-scroll-view/-/react-native-invertible-scroll-view-1.1.0.tgz#bfd50a3f5d66ca12639b7c7a9844ceddd1d16890"

@@ -43,3 +43,6 @@
 (def react-native-animatable (js/require "react-native-animatable"))
 (def animated-text (r/adapt-react-class (.-Text react-native-animatable)))
 (def animated-view (r/adapt-react-class (.-View react-native-animatable)))
+
+(def MaterialIcons (.-default (js/require "react-native-vector-icons/MaterialIcons")))
+(def material-icons (r/adapt-react-class MaterialIcons))
