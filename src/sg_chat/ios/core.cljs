@@ -1,36 +1,29 @@
 (ns sg-chat.ios.core
-  (:require [reagent.core :as r :refer [atom]]
-            [re-frame.core :refer [subscribe dispatch dispatch-sync]]
-            [sg-chat.constants :as c]
-            [sg-chat.firebase]
-            [sg-chat.events]
-            [sg-chat.effects]
-            [sg-chat.subs]))
+    (:require [reagent.core :as r :refer [atom]]
+              [re-frisk-remote.core :refer [enable-re-frisk-remote!]]
+              [re-frame.core :refer [subscribe dispatch
+                                     dispatch-sync]]
+              [sg-chat.screens :refer [sign-in-screen chat-screen
+                                      loading-screen
+                                      channels-screen]]
+              [cljs-react-navigation.re-frame :refer [router]]
+              [sg-chat.rn :refer [ReactNative]]
+              [sg-chat.router :refer [ChannelsStack]]
+              [sg-chat.events]
+              [sg-chat.constants :as c]
+              [sg-chat.subs]))
 
-(def ReactNative (js/require "react-native"))
+(enable-re-frisk-remote! {:host "localhost:4567"})
 
 (def app-registry (.-AppRegistry ReactNative))
-(def text (r/adapt-react-class (.-Text ReactNative)))
-(def view (r/adapt-react-class (.-View ReactNative)))
-(def image (r/adapt-react-class (.-Image ReactNative)))
-(def touchable-highlight (r/adapt-react-class (.-TouchableHighlight ReactNative)))
-
-(def logo-img (js/require "./images/cljs.png"))
-
-(defn alert [title]
-      (.alert (.-Alert ReactNative) title))
 
 (defn app-root []
-  (let [greeting (subscribe [:get-greeting])]
+  (let [current-screen (subscribe [:kv :current-screen])]
     (fn []
-      [view {:style {:flex-direction "column" :margin 40 :align-items "center"}}
-       [text {:style {:font-size 30 :font-weight "100" :margin-bottom 20 :text-align "center"}} @greeting]
-       [image {:source logo-img
-               :style  {:width 80 :height 80 :margin-bottom 30}}]
-       [touchable-highlight {:style {:background-color "#999" :padding 10 :border-radius 5}
-                             :on-press #(alert "HELLO!")}
-        [text {:style {:color "white" :text-align "center" :font-weight "bold"}} "press me"]]])))
+      (condp = @current-screen
+        :sign-in [sign-in-screen]
+        :main [:> ChannelsStack {}]))))
 
 (defn init []
-      (dispatch-sync [:initialize-db])
-      (.registerComponent app-registry "sgChat" #(r/reactify-component app-root)))
+  (dispatch-sync [:initialize-db])
+  (.registerComponent app-registry "main" #(r/reactify-component app-root)))

@@ -1,7 +1,7 @@
 (ns sg-chat.constants)
 
 
-(def env "prod")
+(def env "dev")
 (defonce country "sg")
 (defonce app-name "SG Chat")
 (defonce version "1.0.0")

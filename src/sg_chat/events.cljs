@@ -85,17 +85,26 @@
 (reg-event-fx
  :open-channel
  (fn [{:keys [db]} [_ channel]]
-   {:db (assoc db :fetching? true)
-    :get-channel-messages channel}))
+   (let [channel-key (keyword (:name channel))
+         existing-messages (-> db :messages channel-key)
+         latest-message nil]
+     {:db (if (empty? existing-messages)
+            (assoc db :fetching? true)
+            db)
+      :get-channel-messages {:channel channel
+                             :latest-message latest-message}})))
 
 (reg-event-fx
  :set-messages-in-db
- (fn [{:keys [db]}[_ channel-key messages]]
-   {:db (-> (update-in db [:messages] merge
-                       {channel-key (if (nil? messages)
-                                      []
-                                      (map #(second %1) messages))})
-            (assoc :fetching? false))}))
+ (fn [{:keys [db]}[_ channel-key new-messages]]
+   (let [comparator-fn #(js/Date. (:createdAt %))
+         sorted-messages (when-not (nil? new-messages)
+                           (->> new-messages
+                                (map #(second %1))
+                                (sort-by comparator-fn)
+                                reverse))]
+     {:db (-> (update-in db [:messages] merge {channel-key (or sorted-messages [])})
+              (assoc :fetching? false))})))
 
 (reg-event-fx
  :set-channels-in-db

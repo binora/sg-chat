@@ -33,7 +33,7 @@
 
 (reg-fx
  :get-channel-messages
- (fn [channel]
+ (fn [{:keys [channel latest-message]}]
    (let [on-response (fn [response]
                        (dispatch [:set-messages-in-db
                                   (keyword (:name channel))
@@ -41,7 +41,8 @@
                                       u/to-clj)]))]
      (f/get-channel-messages  (:name channel)
                               on-response
-                              c/hours-before))))
+                              c/hours-before
+                              latest-message))))
 
 (reg-fx
  :get-channels-from-firebase

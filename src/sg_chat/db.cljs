@@ -17,14 +17,15 @@
 
 (defn set-item-local-storage
   [key value success-cb error-cb]
-  (-> (.setItem AsyncStorage value)
+  (-> (.setItem AsyncStorage key value)
       (.then success-cb)
       (.catch error-cb)))
 
 (defn get-item-local-storage
   [key success-cb error-cb]
   (-> (.getItem AsyncStorage key)
-      (.then success-cb)))
+      (.then success-cb)
+      (.catch error-cb)))
 
 
 (defn delete-item-local-storage
@@ -33,4 +34,4 @@
       (.then #(println %))
       (.catch #(println "error"))))
 
-;; (delete-item-local-storage "user")
+ (delete-item-local-storage "user")
