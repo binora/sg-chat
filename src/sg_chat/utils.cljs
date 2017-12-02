@@ -23,3 +23,7 @@
          (.parse js/JSON)
          to-clj)))
 
+(defn get-time [date]
+  (-> date
+      (js/Date.)
+      (.getTime)))

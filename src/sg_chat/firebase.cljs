@@ -24,10 +24,7 @@
 
 
 (defn send-message [channel-name message]
-  (let [m (assoc message
-                 :createdAt (-> (:createdAt message)
-                                        (js/Date.)
-                                        (.getTime)))]
+  (let [m (assoc message :createdAt (u/get-time (:createdAt message)))]
     (-> (.database firebase)
         (.ref (u/build-fpath (str channel-name "-messages")))
         (.push (clj->js m)))))
@@ -40,7 +37,7 @@
     (-> ref
         (.orderByChild "createdAt")
         (.startAt (if latest-message
-                    (:createdAt latest-message)
+                    (inc (:createdAt latest-message))
                     (u/get-date-before hours-before)))
         (.on "value" on-response))))
 

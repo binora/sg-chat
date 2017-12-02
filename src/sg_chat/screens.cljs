@@ -172,18 +172,16 @@
                          [material-icons {:name "send"
                                           :size 32}]]]))]
     (fn [props]
-      (if @fetching?
-        [loading-screen]
-        [view {:style {:width "100%"
-                       :height "100%"}}
-         [gifted-chat {:messages @messages
-                       :render-avatar nil
-                       :render-send render-send
-                       :render-custom-view render-username-on-message
-                       :parse-patterns parse-patterns
-                       :user @user
-                       :on-send on-send}]
-         [keyboard-spacer]]))))
+      [view {:style {:width "100%"
+                     :height "100%"}}
+       [gifted-chat {:messages @messages
+                     :render-avatar nil
+                     :render-send render-send
+                     :render-custom-view render-username-on-message
+                     :isLoadingEarlier @fetching?
+                     :parse-patterns parse-patterns
+                     :user @user
+                     :on-send on-send}]])))
 
 
 ;; [flat-list {:data (into-array @channels)

@@ -107,15 +107,13 @@
                                   reverse
                                   (into []))))
          remove-duplicates (fn [m]
-                             (println (first m) (first existing-messages))
                              (when-not (nil? m)
                                (if (= (first m)
                                       (first existing-messages))
                                  (rest m)
                                  m)))
          sorted-messages (-> new-messages
-                             make-consumable
-                             remove-duplicates)]
+                             make-consumable)]
      {:db (-> (update-in db [:messages channel-key] concat (or sorted-messages []))
               (assoc :fetching? false))})))
 
@@ -131,10 +129,13 @@
 
 (reg-event-fx
  :send-message
- (fn [{:keys [db]} [_ [channel-name message-coll]]]
-   {:db (update-in db [:messages (keyword channel-name)]
-                   concat message-coll)
-    :append-message-to-firebase [channel-name (first message-coll)]}))
+ (fn [{:keys [db]} [_ [channel-name [message]]]]
+   (let [m (assoc message :createdAt (u/get-time (:createdAt message)))
+         channel-key (keyword channel-name)
+         channel-messages (or (-> db :messages channel-key) [])
+         updated-messages (concat [m] channel-messages)]
+     {:db (update-in db [:messages] assoc channel-key updated-messages)
+      :append-message-to-firebase [channel-name (first message-coll)]})))
 
 (reg-event-fx
  :add-user-to-firebase
