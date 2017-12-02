@@ -1,6 +1,8 @@
 (ns sg-chat.ios.core
   (:require [reagent.core :as r :refer [atom]]
             [re-frame.core :refer [subscribe dispatch dispatch-sync]]
+            [sg-chat.constants :as c]
+            [sg-chat.firebase]
             [sg-chat.events]
             [sg-chat.subs]))
 
