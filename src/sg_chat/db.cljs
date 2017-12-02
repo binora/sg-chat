@@ -34,4 +34,4 @@
       (.then #(println %))
       (.catch #(println "error"))))
 
- (delete-item-local-storage "user")
+;; (delete-item-local-storage "user")

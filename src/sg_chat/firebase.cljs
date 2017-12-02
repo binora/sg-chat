@@ -39,7 +39,9 @@
                           u/build-fpath)))]
     (-> ref
         (.orderByChild "createdAt")
-        (.startAt (u/get-date-before hours-before))
+        (.startAt (if latest-message
+                    (:createdAt latest-message)
+                    (u/get-date-before hours-before)))
         (.on "value" on-response))))
 
 (defn get-channels [on-response]
