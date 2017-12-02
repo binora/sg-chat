@@ -1,10 +1,36 @@
 (ns sg-chat.db
   (:require [clojure.spec.alpha :as s]))
 
-;; spec of app-db
-(s/def ::greeting string?)
-(s/def ::app-db
-  (s/keys :req-un [::greeting]))
 
 ;; initial state of app-db
-(def app-db {:greeting "Hello Clojure in iOS and Android!"})
+(def app-db {:greeting "Hello Clojurescript in Expo!"
+             :current-channel {}
+             :current-screen :sign-in
+             :fetching? false
+             :initialized? false
+             :reg-btn-loading? false
+             :messages {}})
+
+;; local storage
+(def ReactNative (js/require "react-native"))
+(def AsyncStorage (.-AsyncStorage ReactNative))
+
+(defn set-item-local-storage
+  [key value success-cb error-cb]
+  (-> (.setItem AsyncStorage value)
+      (.then success-cb)
+      (.catch error-cb)))
+
+(defn get-item-local-storage
+  [key success-cb error-cb]
+  (-> (.getItem AsyncStorage key)
+      (.then success-cb)))
+
+
+(defn delete-item-local-storage
+  [key]
+  (-> (.removeItem AsyncStorage key)
+      (.then #(println %))
+      (.catch #(println "error"))))
+
+;; (delete-item-local-storage "user")

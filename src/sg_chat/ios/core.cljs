@@ -4,6 +4,7 @@
             [sg-chat.constants :as c]
             [sg-chat.firebase]
             [sg-chat.events]
+            [sg-chat.effects]
             [sg-chat.subs]))
 
 (def ReactNative (js/require "react-native"))

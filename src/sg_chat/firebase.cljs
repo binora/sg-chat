@@ -7,7 +7,6 @@
 (def firebase (js/require "firebase/app"))
 (def firebase-auth (js/require "firebase/auth"))
 (def firebase-db (js/require "firebase/database"))
-(println firebase-db)
 
 (defonce api-key "KSk]MOzU<[Oz7@RV}kYO~C;_YTorP=OA:")
 
