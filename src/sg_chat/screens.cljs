@@ -186,22 +186,41 @@
         (:text message)]]])))
 
 (defn chat-input [props]
-  (let [chat-text-input (subscribe [:kv :chat-text-input])
+  (let [state (r/atom {:input ""
+                       :search-str ""})
         username-suggestions (subscribe [:kv :username-suggestions])
         trigger-cb (fn [str]
-                     (when-not (empty? str)
-                       (dispatch [:get-username-suggestions str])))
-        render-suggestions-row (fn [props]
-                                 (r/as-element [view
-                                                [text (:item (u/to-clj props))]]))]
+                     (when-not (empty? (subs str 1))
+                       (swap! state assoc :search-str str)
+                       (dispatch [:get-username-suggestions (subs str 1)])))
+        on-suggestion-tap (fn [suggestion hide-panel]
+                            (let [{:keys [input search-str]} @state
+                                  before-text (->> (reverse input)
+                                                   (drop (count search-str))
+                                                   reverse
+                                                   (apply str))]
+                              (println "search str" search-str)
+                              (println input)
+                              (println before-text)
+                              (println "suggestion" suggestion)
+                              (hide-panel)
+                              (swap! state assoc :input (str before-text suggestion))))
+        render-suggestions-row (fn [props hide-panel]
+                                 (r/as-element
+                                  (let [suggestion (:item(u/to-clj props))]
+                                    [view
+                                     [touchable-highlight
+                                      {:on-press #(on-suggestion-tap suggestion hide-panel)}
+                                      [text suggestion]]])))]
     (fn [props]
-      [mentions-input {:on-change-text #(dispatch [:set-chat-text-input %])
+      [mentions-input {:on-change-text #(swap! state assoc :input %)
                        :trigger "@"
-                       :trigger-callback #(trigger-cb (subs % 1))
+                       :trigger-callback trigger-cb
                        :horizontal false
                        :suggestions-data (or @username-suggestions [])
                        :render-suggestions-row render-suggestions-row
-                       :value @chat-text-input
+                       :value (or (:input @state) "")
+                       :auto-grow true
                        :suggestion-row-height 20
                        :MaxVisibleRowCount 3
                        :key-extractor #(identity %2)
