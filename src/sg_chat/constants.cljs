@@ -8,6 +8,6 @@
 
 
 (defonce hours-before 48)
-(defonce header-bg-color (if (= env "dev") "orange" "#3D7ED4"))
+(defonce header-bg-color (if (= env "dev") "#3D7ED4" "#3D7ED4"))
 
 (def ga-tracking-id "UA-110198163-2")

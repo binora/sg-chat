@@ -99,22 +99,15 @@
  (fn [{:keys [db]}[_ channel-key new-messages]]
    (let [comparator-fn #(js/Date. (:createdAt %))
          existing-messages (or (-> db :messages channel-key) [])
-         make-consumable (fn [m]
-                           (when-not (nil? new-messages)
-                             (->> new-messages
-                                  (map #(second %1))
-                                  (sort-by comparator-fn)
-                                  reverse
-                                  (into []))))
-         remove-duplicates (fn [m]
-                             (when-not (nil? m)
-                               (if (= (first m)
-                                      (first existing-messages))
-                                 (rest m)
-                                 m)))
-         sorted-messages (-> new-messages
-                             make-consumable)]
-     {:db (-> (update-in db [:messages channel-key] concat (or sorted-messages []))
+         new-messages (->> new-messages
+                           (map #(second %1)))
+         sorted-messages (->> existing-messages
+                              (concat new-messages)
+                              (into #{})
+                              (sort-by comparator-fn)
+                              reverse
+                              (into []))]
+     {:db (-> (update-in db [:messages] assoc channel-key sorted-messages)
               (assoc :fetching? false))})))
 
 (reg-event-fx
@@ -130,12 +123,11 @@
 (reg-event-fx
  :send-message
  (fn [{:keys [db]} [_ [channel-name [message]]]]
-   (let [m (assoc message :createdAt (u/get-time (:createdAt message)))
-         channel-key (keyword channel-name)
+   (let [channel-key (keyword channel-name)
          channel-messages (or (-> db :messages channel-key) [])
-         updated-messages (concat [m] channel-messages)]
-     {:db (update-in db [:messages] assoc channel-key updated-messages)
-      :append-message-to-firebase [channel-name (first message-coll)]})))
+         updated-messages (concat [message] channel-messages)]
+     {:db db
+      :append-message-to-firebase [channel-name message]})))
 
 (reg-event-fx
  :add-user-to-firebase
