@@ -26,4 +26,4 @@
 
 (defn init []
   (dispatch-sync [:initialize-db])
-  (.registerComponent app-registry "main" #(r/reactify-component app-root)))
+  (.registerComponent app-registry "sgChat" #(r/reactify-component app-root)))
