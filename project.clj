@@ -46,6 +46,8 @@
                                                          :main          "env.ios.main"
                                                          :output-dir    "target/ios"
                                                          :static-fns    true
+                                                         :language-in   :es6
+                                                         :language-out  :es5
                                                          :optimize-constants true
                                                          :optimizations :simple
                                                          :closure-defines {"goog.DEBUG" false}}}
@@ -54,6 +56,8 @@
                                           :compiler     {:output-to     "index.android.js"
                                                          :main          "env.android.main"
                                                          :output-dir    "target/android"
+                                                         :language-in   :es6
+                                                         :language-out  :es5
                                                          :static-fns    true
                                                          :optimize-constants true
                                                          :optimizations :simple
@@ -66,6 +70,8 @@
                                               :compiler     {:output-to     "index.ios.js"
                                                              :main          "env.ios.main"
                                                              :output-dir    "target/ios"
+                                                             :language-in   :es6
+                                                             :language-out  :es5
                                                              :static-fns    true
                                                              :optimize-constants true
                                                              :optimizations :advanced
@@ -75,6 +81,8 @@
                                               :compiler     {:output-to     "index.android.js"
                                                              :main          "env.android.main"
                                                              :output-dir    "target/android"
+                                                             :language-in   :es6
+                                                             :language-out  :es5
                                                              :static-fns    true
                                                              :optimize-constants true
                                                              :optimizations :advanced

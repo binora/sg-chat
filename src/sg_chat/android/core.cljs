@@ -1,6 +1,6 @@
 (ns sg-chat.android.core
     (:require [reagent.core :as r :refer [atom]]
-              [re-frisk-remote.core :refer [enable-re-frisk-remote!]]
+              ;; [re-frisk-remote.core :refer [enable-re-frisk-remote!]]
               [re-frame.core :refer [subscribe dispatch
                                      dispatch-sync]]
               [sg-chat.screens :refer [sign-in-screen chat-screen
@@ -13,7 +13,7 @@
               [sg-chat.constants :as c]
               [sg-chat.subs]))
 
-(enable-re-frisk-remote! {:host "localhost:4567"})
+;; (enable-re-frisk-remote! {:host "localhost:4567"})
 
 (def app-registry (.-AppRegistry ReactNative))
 
