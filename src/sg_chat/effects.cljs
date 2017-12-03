@@ -57,9 +57,18 @@
 (reg-fx
  :show-error
  (fn [error]
-   (alert {:title error
-           :message ""
-           :buttons [{:text "Try Again"
-                      :onPress #(dispatch [:save-user-in-local-storage (-> app-db
-                                                                           :user
-                                                                           :name)])}]})))
+   (let [on-press (fn []
+                    (dispatch [:save-user-in-local-storage
+                               (-> app-db :user :name)]))]
+     (alert {:title error
+             :message ""
+             :buttons [{:text "Try Again"
+                        :onPress on-press}]}))))
+(reg-fx
+ :get-matching-users-from-firebase
+ (fn [search-str]
+   (let [on-response (fn [response]
+                       (dispatch [:set-username-suggestions
+                                  (u/to-clj (.val response))]))]
+     (f/get-matching-users-from-firebase search-str on-response))))
+

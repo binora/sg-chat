@@ -141,3 +141,19 @@
     :db (assoc db :reg-btn-loading? false)}))
 
 
+(reg-event-fx
+ :set-chat-text-input
+ (fn [{:keys [db]} [_ chat-text-input]]
+   {:db (assoc db :chat-text-input chat-text-input)}))
+
+(reg-event-fx
+ :get-username-suggestions
+ (fn [{:keys [db]} [_ search-str]]
+   {:get-matching-users-from-firebase search-str}))
+
+(reg-event-db
+ :set-username-suggestions
+ (fn [db [_ users]]
+   (let [usernames (map #(str "@" (:name (second %))) users)]
+     (assoc db :username-suggestions usernames))))
+

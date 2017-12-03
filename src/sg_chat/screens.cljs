@@ -185,6 +185,29 @@
        [text  {:style {:color (if own-message? "white" "black")}}
         (:text message)]]])))
 
+(defn chat-input [props]
+  (let [chat-text-input (subscribe [:kv :chat-text-input])
+        username-suggestions (subscribe [:kv :username-suggestions])
+        trigger-cb (fn [str]
+                     (when-not (empty? str)
+                       (dispatch [:get-username-suggestions str])))
+        render-suggestions-row (fn [props]
+                                 (r/as-element [view
+                                                [text (:item (u/to-clj props))]]))]
+    (fn [props]
+      [mentions-input {:on-change-text #(dispatch [:set-chat-text-input %])
+                       :trigger "@"
+                       :trigger-callback #(trigger-cb (subs % 1))
+                       :horizontal false
+                       :suggestions-data (or @username-suggestions [])
+                       :render-suggestions-row render-suggestions-row
+                       :value @chat-text-input
+                       :suggestion-row-height 20
+                       :MaxVisibleRowCount 3
+                       :key-extractor #(identity %2)
+                       :trigger-location "new-word-only"
+                       :placeholder "Write a message"}])))
+
 (defn chat-screen [{:keys [navigation] :as props}]
   (let [user (subscribe [:kv :user])
         fetching? (subscribe [:kv :fetching?])
@@ -206,20 +229,15 @@
                          [material-icons {:name "send"
                                           :size 32}]]]))]
     (fn [props]
-      [view {:style {:width "100%"
-                     :height "100%"}}
-       [flat-list {:data (into-array @messages)
-                   :key-extractor #(identity %2)
-                   :render-item #(render-message %1 (:name @user))
-                   :inverted true
-                   :style {:width "100%"
-                           :margin-bottom 10
-                           :flex 1}}]
-       [mentions-input {:on-change #(println %)}]])))
-
-
-;; [flat-list {:data (into-array @channels)
-;;             :key-extractor #(identity %2)
-;;             :render-item #(render-channel %1 navigate)
-;;             :style {:width "80%"
-;;                     :flex 1
+      [container
+       [view {:style {:width "100%"
+                      :height "100%"
+                      :margin-bottom 20}}
+        [flat-list {:data (into-array @messages)
+                    :key-extractor #(identity %2)
+                    :render-item #(render-message %1 (:name @user))
+                    :inverted true
+                    :style {:width "100%"
+                            :margin-bottom 10
+                            :flex 1}}]
+        [chat-input {:user @user}]]])))

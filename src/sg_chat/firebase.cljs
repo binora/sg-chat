@@ -39,7 +39,8 @@
         (.startAt (if latest-message
                     (inc (:createdAt latest-message))
                     (u/get-date-before hours-before)))
-        (.on "value" on-response))))
+        (.once "value" on-response))
+    (.on ref "child_added" on-response)))
 
 (defn get-channels [on-response]
   (-> (.database firebase)
@@ -50,3 +51,12 @@
   (-> (.database firebase)
       (.ref (u/build-fpath "users"))
       (.push (clj->js user))))
+
+(defn get-matching-users-from-firebase
+  [search-str on-response]
+  (-> (.database firebase)
+      (.ref (u/build-fpath "users"))
+      (.orderByChild "name")
+      (.startAt search-str)
+      (.endAt (str search-str "\uf8ff"))
+      (.once "value" on-response)))
