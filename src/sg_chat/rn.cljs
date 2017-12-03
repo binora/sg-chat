@@ -11,6 +11,8 @@
 (def dimensions (u/to-clj (-> (.-Dimensions ReactNative) (.get "window"))))
 (def touchable-highlight (r/adapt-react-class (.-TouchableHighlight ReactNative)))
 (def text-input (r/adapt-react-class (.-TextInput ReactNative)))
+(def FlatList (.-FlatList ReactNative))
+(def flat-list (r/adapt-react-class FlatList))
 
 (def Alert (.-Alert ReactNative))
 (defn alert [{:keys [title message buttons]}]
@@ -46,3 +48,7 @@
 
 (def MaterialIcons (.-default (js/require "react-native-vector-icons/MaterialIcons")))
 (def material-icons (r/adapt-react-class MaterialIcons))
+
+(def react-native-mentions (js/require "react-native-mentions"))
+(def mentions-input (-> (.-default react-native-mentions)
+                        r/adapt-react-class))

@@ -1,6 +1,9 @@
 (ns user
-    (:use [figwheel-sidecar.repl-api :as ra]))
+  (:use [figwheel-sidecar.repl-api :as ra])
+  (:require [re-frisk-sidecar.core :as rfs]))
 ;; This namespace is loaded automatically by nREPL
+
+(rfs/-main)
 
 ;; read project.clj to get build configs
 (def profiles (->> "project.clj"

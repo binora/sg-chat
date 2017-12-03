@@ -1,10 +1,12 @@
 (ns ^:figwheel-no-load env.android.main
   (:require [reagent.core :as r]
             [re-frame.core :refer [clear-subscription-cache!]]
+            [re-frisk-remote.core :as rr]
             [sg-chat.android.core :as core]
             [figwheel.client :as fw]
             [env.config :as conf]))
 
+(rr/enable-re-frisk-remote! {:host "localhost:4567"})
 (enable-console-print!)
 
 (assert (exists? core/init) "Fatal Error - Your core.cljs file doesn't define an 'init' function!!! - Perhaps there was a compilation failure?")

@@ -3,11 +3,12 @@
             [clojure.string :as string]
             [re-frame.core :refer [subscribe dispatch dispatch-sync]]
             [sg-chat.rn :refer [text view image text-input dimensions
-                               gifted-chat rn-list list-item
-                               button activity-indicator gc-send
-                               keyboard-spacer linking material-icons
-                               animated-text animated-view
-                               touchable-highlight]]
+                                gifted-chat rn-list list-item
+                                button activity-indicator gc-send
+                                keyboard-spacer linking material-icons
+                                animated-text animated-view flat-list
+                                mentions-input
+                                touchable-highlight]]
             [sg-chat.utils :as u]
             [sg-chat.constants :as c]
             [sg-chat.subs]
@@ -147,9 +148,42 @@
         current-username (-> p :user :name)]
     (r/as-element
      [view
-      [text {:style {:color "#3D7ED4"
-                     :font-weight "bold"}}
-       (if (= sender current-username) "" sender)]])))
+      ])))
+
+(defn render-message [js-message current-sender]
+  (let [message (-> js-message
+                    u/to-clj
+                    :item)
+        message-sender (-> message :user :name)
+        own-message? (= message-sender
+                        current-sender)
+        others-message-style {:align-self "flex-start"
+                              :margin-left 10
+                              :background-color "#e1e1e1"}
+        own-message-style {:align-self "flex-end"
+                           :margin-right 10
+                           :color "white"
+                           :background-color c/header-bg-color}]
+    (r/as-element
+     [view (merge {:flex 1
+                   :max-width "40%"
+                   :min-width 40
+                   :min-height 40
+                   :align-items "flex-start"
+                   :flex-direction "column"
+                   :border-radius 3
+                   :margin-bottom "5%"}
+                  (if own-message?
+                    own-message-style
+                    others-message-style))
+      [view {:padding 2}
+       (if-not own-message?
+         [text {:style {:color "#3D7ED4"
+                        :margin-bottom 5
+                        :font-weight "bold"}}
+          message-sender])
+       [text  {:style {:color (if own-message? "white" "black")}}
+        (:text message)]]])))
 
 (defn chat-screen [{:keys [navigation] :as props}]
   (let [user (subscribe [:kv :user])
@@ -174,14 +208,14 @@
     (fn [props]
       [view {:style {:width "100%"
                      :height "100%"}}
-       [gifted-chat {:messages @messages
-                     :render-avatar nil
-                     :render-send render-send
-                     :render-custom-view render-username-on-message
-                     :isLoadingEarlier @fetching?
-                     :parse-patterns parse-patterns
-                     :user @user
-                     :on-send on-send}]])))
+       [flat-list {:data (into-array @messages)
+                   :key-extractor #(identity %2)
+                   :render-item #(render-message %1 (:name @user))
+                   :inverted true
+                   :style {:width "100%"
+                           :margin-bottom 10
+                           :flex 1}}]
+       [mentions-input {:on-change #(println %)}]])))
 
 
 ;; [flat-list {:data (into-array @channels)

@@ -19,6 +19,7 @@
             ["do" "clean"
              ["with-profile" "advanced" "cljsbuild" "once"]]}
   :profiles {:dev {:dependencies [[figwheel-sidecar "0.5.14"]
+                                  [re-frisk-sidecar "0.5.4"]
                                   [re-frisk-remote "0.5.1"]
                                   [com.cemerick/piggieback "0.2.1"]]
                    :source-paths ["src" "env/dev"]

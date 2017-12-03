@@ -105,8 +105,8 @@
                               (concat new-messages)
                               (into #{})
                               (sort-by comparator-fn)
-                              reverse
-                              (into []))]
+                              (into [])
+                              reverse)]
      {:db (-> (update-in db [:messages] assoc channel-key sorted-messages)
               (assoc :fetching? false))})))
 
