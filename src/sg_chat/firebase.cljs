@@ -36,11 +36,8 @@
                           u/build-fpath)))]
     (-> ref
         (.orderByChild "createdAt")
-        (.startAt (if latest-message
-                    (inc (:createdAt latest-message))
-                    (u/get-date-before hours-before)))
-        (.once "value" on-response))
-    (.on ref "child_added" on-response)))
+        (.startAt (u/get-date-before hours-before))
+        (.on "child_added" on-response))))
 
 (defn get-channels [on-response]
   (-> (.database firebase)

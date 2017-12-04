@@ -35,7 +35,7 @@
  :get-channel-messages
  (fn [{:keys [channel latest-message]}]
    (let [on-response (fn [response]
-                       (dispatch [:set-messages-in-db
+                       (dispatch [:set-message-in-db
                                   (keyword (:name channel))
                                   (-> (.val response)
                                       u/to-clj)]))]

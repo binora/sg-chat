@@ -86,7 +86,6 @@
                         :placeholder-text-color "white"
                         :underline-color-android "transparent"
                         :text-align "center"
-                        :value (:username @state)
                         :on-change on-input-change}]
            (if @reg-btn-loading?
              [activity-indicator]
@@ -139,17 +138,6 @@
                        @channels)])])))
 
 
-(defn render-username-on-message [props]
-  (let [p (u/to-clj props)
-        sender (-> p
-                   :currentMessage
-                   :user
-                   :name)
-        current-username (-> p :user :name)]
-    (r/as-element
-     [view
-      ])))
-
 (defn render-message [js-message current-sender]
   (let [message (-> js-message
                     u/to-clj
@@ -186,8 +174,9 @@
         (:text message)]]])))
 
 (defn chat-input [props]
-  (let [state (r/atom {:input ""
-                       :search-str ""})
+  (let [init-state  {:input ""
+                     :search-str ""}
+        state (r/atom init-state)
         username-suggestions (subscribe [:kv :username-suggestions])
         trigger-cb (fn [str]
                      (when-not (empty? (subs str 1))
@@ -199,43 +188,54 @@
                                                    (drop (count search-str))
                                                    reverse
                                                    (apply str))]
-                              (println "search str" search-str)
-                              (println input)
-                              (println before-text)
-                              (println "suggestion" suggestion)
                               (hide-panel)
+                              (dispatch [:set-username-suggestions nil])
                               (swap! state assoc :input (str before-text suggestion))))
         render-suggestions-row (fn [props hide-panel]
                                  (r/as-element
                                   (let [suggestion (:item(u/to-clj props))]
-                                    [view
+                                    [view {:style {:width "50%"}}
                                      [touchable-highlight
                                       {:on-press #(on-suggestion-tap suggestion hide-panel)}
-                                      [text suggestion]]])))]
+                                      [text suggestion]]])))
+        on-send (fn [channel-name]
+                  (dispatch [:send-message [channel-name {:text (string/trim (:input @state))
+                                                          :_id (u/node-uuid)
+                                                          :createdAt (u/get-time (js/Date.))
+                                                          :user (:user props)}]])
+                  (reset! state init-state))]
     (fn [props]
-      [mentions-input {:on-change-text #(swap! state assoc :input %)
-                       :trigger "@"
-                       :trigger-callback trigger-cb
-                       :horizontal false
-                       :suggestions-data (or @username-suggestions [])
-                       :render-suggestions-row render-suggestions-row
-                       :value (or (:input @state) "")
-                       :auto-grow true
-                       :suggestion-row-height 20
-                       :MaxVisibleRowCount 3
-                       :key-extractor #(identity %2)
-                       :trigger-location "new-word-only"
-                       :placeholder "Write a message"}])))
+      [view {:style {:align-items "center"
+                     :flex-direction "row"
+                     :justify-content "space-between"
+                     :width "100%"
+                     :height 20
+                     :margin-left 5}}
+       [mentions-input {:on-change-text #(swap! state assoc :input %)
+                        :trigger "@"
+                        :trigger-callback trigger-cb
+                        :horizontal false
+                        :style {:width "100%"
+                                :border-width 2}
+                        :suggestions-data (or @username-suggestions [])
+                        :render-suggestions-row render-suggestions-row
+                        :value (or (:input @state) "")
+                        :auto-grow true
+                        :suggestion-row-height 20
+                        :MaxVisibleRowCount 3
+                        :key-extractor #(identity %2)
+                        :trigger-location "new-word-only"
+                        :placeholder "Write a message"}]
+       [material-icons {:name "send"
+                        :color c/header-bg-color
+                        :on-press #(on-send (-> props :channel :name))
+                        :size 30}]])))
 
 (defn chat-screen [{:keys [navigation] :as props}]
   (let [user (subscribe [:kv :user])
         fetching? (subscribe [:kv :fetching?])
         channel (subscribe [:kv :current-channel])
         messages (subscribe [:channel-messages (:name @channel)])
-        on-send (fn [message-coll]
-                  (dispatch [:send-message
-                             [(:name @channel)
-                              (u/to-clj message-coll)]]))
         parse-patterns (fn [style]
                          (clj->js [{:type "url"
                                     :style style
@@ -259,4 +259,5 @@
                     :style {:width "100%"
                             :margin-bottom 10
                             :flex 1}}]
-        [chat-input {:user @user}]]])))
+        [chat-input {:user @user
+                     :channel @channel}]]])))
