@@ -45,6 +45,8 @@
         get-text #(-> % .-nativeEvent .-text)
         on-input-change (fn [value]
                           (swap! state assoc :username (get-text value)))
+        on-register-press (fn [])
+        on-login-press (fn [])
         on-press (fn []
                    (when-not (-> (:username @state)
                                  string/trim
@@ -61,39 +63,61 @@
               :style {:background-color c/header-bg-color}}
         (if @db-initialized?
           [animated-text (merge {:style {:font-size 30
-                                         :margin-top 30
+                                         :margin-top "40%"
                                          :color "white"}
 
                                  :animation "fadeInDown"})
            "sg chat"]
           [activity-indicator])
         (if @db-initialized?
-          [animated-view {:style {:width "100%"
+          [animated-view {:style {:width "80%"
                                   :flex-direction "column"
                                   :justify-content "center"}
                           :animation "fadeInUp"}
            [text-input {:style {:margin-top "30%"
                                 :align-self "center"
-                                :margin-bottom "10%"
                                 :border-bottom-width 0.5
                                 :border-bottom-color "white"
                                 :color "white"
                                 :width "60%"}
                         :auto-focus true
+                        :tint-color "white"
+                        :placeholder "username"
+                        :placeholder-text-color "white"
+                        :underline-color-android "transparent"
+                        :text-align "center"
+                        :on-change on-input-change}]
+           [text-input {:style {:margin-top "10%"
+                                :align-self "center"
+                                :margin-bottom "20%"
+                                :border-bottom-width 0.5
+                                :border-bottom-color "white"
+                                :color "white"
+                                :width "60%"}
                         :on-submit-editing on-press
                         :tint-color "white"
-                        :placeholder "Enter username"
+                        :placeholder "password"
                         :placeholder-text-color "white"
                         :underline-color-android "transparent"
                         :text-align "center"
                         :on-change on-input-change}]
            (if @reg-btn-loading?
              [activity-indicator]
-             [touchable-highlight {:on-press on-press
-                                   :underlay-color "transparent"
-                                   :style {:align-self "center"}}
-              [text {:style {:color "white"}}
-               "Register"]])])]])))
+             [view {:style {:flex-direction "row"
+                            :align-self "center"
+                            :justify-content "space-between"
+                            :width "60%"}}
+              [touchable-highlight {:on-press on-register-press
+                                    :underlay-color "transparent"
+                                    :style {:align-self "center"}}
+               [text {:style {:color "white"}}
+                "Register"]]
+              [touchable-highlight {:on-press on-login-press
+                                    :underlay-color "transparent"
+                                    :style {:align-self "center"}}
+               [text {:style {:color "white"}}
+                "Login"]]]
+             )])]])))
 
 
 (defn render-channel [js-item navigate]
