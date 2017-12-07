@@ -12,12 +12,12 @@
             [sg-chat.utils :as u]
             [sg-chat.constants :as c]
             [sg-chat.subs]
-            [sg-chat.analytics :as analytics]
-            [clojure.string :as str]))
+            [sg-chat.analytics :as analytics]))
+
+(enable-console-print!)
 
 (defonce device-height (:height dimensions))
 (defonce device-width (:width dimensions))
-
 
 (defn container [& children]
   [view {:style {:flex 1
@@ -41,18 +41,20 @@
         db-initialized? (subscribe [:kv :initialized?])
         saved-user (subscribe [:kv :user])
         reg-btn-loading? (subscribe [:kv :reg-btn-loading?])
-        state (r/atom {:username ""})
+        state (r/atom {:username ""
+                       :password ""})
         get-text #(-> % .-nativeEvent .-text)
-        on-input-change (fn [value]
-                          (swap! state assoc :username (get-text value)))
-        on-register-press (fn [])
-        on-login-press (fn [])
-        on-press (fn []
-                   (when-not (-> (:username @state)
-                                 string/trim
-                                 empty?)
-                     (dispatch [:save-user-in-local-storage
-                                (string/trim (:username @state))])))]
+        on-input-change (fn [key value]
+                          (swap! state assoc key (get-text value)))
+        on-press (fn [event]
+                   (let [user {:name (string/trim (:username @state))
+                               :password (string/trim (:password @state))
+                               :id (u/node-uuid)}
+                         invalid-input? (or (empty? (:name user))
+                                            (empty? (:password user)))]
+                     (if-not invalid-input?
+                       (dispatch [event user])
+                       (dispatch [:show-error "Please enter both username and password."]))))]
     (fn [props]
       [container
        [view {:width "100%"
@@ -63,7 +65,7 @@
               :style {:background-color c/header-bg-color}}
         (if @db-initialized?
           [animated-text (merge {:style {:font-size 30
-                                         :margin-top "40%"
+                                         :margin-top "20%"
                                          :color "white"}
 
                                  :animation "fadeInDown"})
@@ -81,12 +83,13 @@
                                 :color "white"
                                 :width "60%"}
                         :auto-focus true
+                        :auto-capitalize "none"
                         :tint-color "white"
                         :placeholder "username"
                         :placeholder-text-color "white"
                         :underline-color-android "transparent"
                         :text-align "center"
-                        :on-change on-input-change}]
+                        :on-change #(on-input-change :username %)}]
            [text-input {:style {:margin-top "10%"
                                 :align-self "center"
                                 :margin-bottom "20%"
@@ -94,30 +97,30 @@
                                 :border-bottom-color "white"
                                 :color "white"
                                 :width "60%"}
-                        :on-submit-editing on-press
+                        :secure-text-entry true
+                        :auto-capitalize "none"
                         :tint-color "white"
                         :placeholder "password"
                         :placeholder-text-color "white"
                         :underline-color-android "transparent"
                         :text-align "center"
-                        :on-change on-input-change}]
+                        :on-change #(on-input-change :password %)}]
            (if @reg-btn-loading?
              [activity-indicator]
              [view {:style {:flex-direction "row"
                             :align-self "center"
                             :justify-content "space-between"
                             :width "60%"}}
-              [touchable-highlight {:on-press on-register-press
+              [touchable-highlight {:on-press #(on-press :check-user-availability)
                                     :underlay-color "transparent"
                                     :style {:align-self "center"}}
                [text {:style {:color "white"}}
                 "Register"]]
-              [touchable-highlight {:on-press on-login-press
+              [touchable-highlight {:on-press #(on-press :login-user)
                                     :underlay-color "transparent"
                                     :style {:align-self "center"}}
                [text {:style {:color "white"}}
-                "Login"]]]
-             )])]])))
+                "Login"]]])])]])))
 
 
 (defn render-channel [js-item navigate]

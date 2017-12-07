@@ -44,10 +44,12 @@
       (.ref (u/build-fpath "channels"))
       (.on "value" on-response)))
 
-(defn add-user-to-firebase [user]
+(defn add-user-to-firebase [{:keys [user on-success on-error]}]
   (-> (.database firebase)
       (.ref (u/build-fpath "users"))
-      (.push (clj->js user))))
+      (.push (clj->js user))
+      (.then on-success)
+      (.catch on-error)))
 
 (defn get-matching-users-from-firebase
   [search-str on-response]
@@ -57,3 +59,11 @@
       (.startAt search-str)
       (.endAt (str search-str "\uf8ff"))
       (.once "value" on-response)))
+
+(defn check-user-in-firebase
+  [user check-response]
+  (-> (.database firebase)
+      (.ref (u/build-fpath "users"))
+      (.orderByChild "name")
+      (.equalTo (:name user))
+      (.once "value" #(check-response (u/to-clj (.val %))))))

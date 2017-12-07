@@ -51,19 +51,15 @@
 
 (reg-fx
  :add-user-to-firebase
- (fn [user]
-   (f/add-user-to-firebase user)))
+ (fn [params]
+   (f/add-user-to-firebase params)))
 
 (reg-fx
  :show-error
  (fn [error]
-   (let [on-press (fn []
-                    (dispatch [:save-user-in-local-storage
-                               (-> app-db :user :name)]))]
-     (alert {:title error
-             :message ""
-             :buttons [{:text "Try Again"
-                        :onPress on-press}]}))))
+   (alert {:title error
+           :message ""
+           :buttons [{:text "OK"}]})))
 (reg-fx
  :get-matching-users-from-firebase
  (fn [search-str]
@@ -72,3 +68,13 @@
                                   (u/to-clj (.val response))]))]
      (f/get-matching-users-from-firebase search-str on-response))))
 
+
+(reg-fx
+ :check-user-in-firebase
+ (fn [user]
+   (let [check-response (fn [r]
+                          (println "response  " r)
+                          (if (nil? r)
+                            (dispatch [:register-user user])
+                            (dispatch [:show-error "This username is already taken!"])))]
+     (f/check-user-in-firebase user check-response))))

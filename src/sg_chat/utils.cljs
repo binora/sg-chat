@@ -1,5 +1,9 @@
 (ns sg-chat.utils
-  (:require [sg-chat.constants :as c]))
+  (:require [goog.crypt :as crypt]
+            [goog.crypt.Md5 :as Md5]
+            [sg-chat.constants :as c]))
+
+(enable-console-print!)
 
 (def node-uuid (js/require "uuid/v1"))
 
@@ -27,3 +31,8 @@
   (-> date
       (js/Date.)
       (.getTime)))
+
+(defn encrypt [input]
+  (->> input
+       (.digest (goog.crypt.Md5.))
+       crypt/byteArrayToHex))

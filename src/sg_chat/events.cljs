@@ -39,6 +39,21 @@
                                                           u/to-clj)]))]
      {:get-channels-from-firebase on-response})))
 
+(reg-event-fx
+ :check-user-availability
+ (fn [{:keys [db]} [_ user]]
+   {:check-user-in-firebase user
+    :db (assoc db :reg-btn-loading? true)}))
+
+(reg-event-fx
+ :register-user
+ (fn [{:keys [db]} [_ user]]
+   (let [on-success #(dispatch [:save-user-in-local-storage user])
+         on-error #(dispatch [:show-error "Unable to register user"])]
+     {:add-user-to-firebase {:user user
+                             :on-success on-success
+                             :on-error on-error}})))
+
 (reg-event-db
  :set-user-in-db
  (fn [db [_ user]]
@@ -50,7 +65,6 @@
    (let [user {:name username
                :_id (u/node-uuid)}
          on-save-success (fn []
-                           (dispatch [:add-user-to-firebase user])
                            (dispatch [:set-current-screen :main])
                            (dispatch [:get-channels-from-firebase]))
          error-cb #(dispatch [:show-error "Unable to save user"])]
