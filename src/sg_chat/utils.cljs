@@ -33,6 +33,7 @@
       (.getTime)))
 
 (defn encrypt [input]
-  (->> input
-       (.digest (goog.crypt.Md5.))
-       crypt/byteArrayToHex))
+  (when-not (nil? input)
+    (->> input
+         (.digest (goog.crypt.Md5.))
+         crypt/byteArrayToHex)))

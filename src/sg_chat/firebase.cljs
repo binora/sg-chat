@@ -66,4 +66,7 @@
       (.ref (u/build-fpath "users"))
       (.orderByChild "name")
       (.equalTo (:name user))
-      (.once "value" #(check-response (u/to-clj (.val %))))))
+      (.once "value" #(check-response (some->> (.val %)
+                                               u/to-clj
+                                               vals
+                                               first)))))

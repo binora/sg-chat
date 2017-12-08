@@ -45,13 +45,18 @@
                        :password ""})
         get-text #(-> % .-nativeEvent .-text)
         on-input-change (fn [key value]
-                          (swap! state assoc key (get-text value)))
+                          (swap! state assoc key (if (= key :username)
+                                                   (string/lower-case value)
+                                                   value)))
         on-press (fn [event]
-                   (let [user {:name (string/trim (:username @state))
-                               :password (string/trim (:password @state))
-                               :id (u/node-uuid)}
-                         invalid-input? (or (empty? (:name user))
-                                            (empty? (:password user)))]
+                   (let [{:keys [username password]} @state
+                         invalid-input? (or (empty? username)
+                                            (empty? password))
+                         user (when-not invalid-input?
+                                {:name (->> (:username @state)
+                                            string/trim)
+                                 :password (u/encrypt (:password @state))
+                                 :id (u/node-uuid)})]
                      (if-not invalid-input?
                        (dispatch [event user])
                        (dispatch [:show-error "Please enter both username and password."]))))]
@@ -83,13 +88,13 @@
                                 :color "white"
                                 :width "60%"}
                         :auto-focus true
-                        :auto-capitalize "none"
                         :tint-color "white"
+                        :auto-capitalize "none"
                         :placeholder "username"
                         :placeholder-text-color "white"
                         :underline-color-android "transparent"
                         :text-align "center"
-                        :on-change #(on-input-change :username %)}]
+                        :on-change #(on-input-change :username (get-text %))}]
            [text-input {:style {:margin-top "10%"
                                 :align-self "center"
                                 :margin-bottom "20%"
@@ -104,7 +109,7 @@
                         :placeholder-text-color "white"
                         :underline-color-android "transparent"
                         :text-align "center"
-                        :on-change #(on-input-change :password %)}]
+                        :on-change #(on-input-change :password (get-text %))}]
            (if @reg-btn-loading?
              [activity-indicator]
              [view {:style {:flex-direction "row"
@@ -226,10 +231,11 @@
                                       {:on-press #(on-suggestion-tap suggestion hide-panel)}
                                       [text suggestion]]])))
         on-send (fn [channel-name]
-                  (dispatch [:send-message [channel-name {:text (string/trim (:input @state))
-                                                          :_id (u/node-uuid)
-                                                          :createdAt (u/get-time (js/Date.))
-                                                          :user (:user props)}]])
+                  (dispatch [:send-message {:message {:text (string/trim (:input @state))
+                                                      :_id (u/node-uuid)
+                                                      :createdAt (u/get-time (js/Date.))
+                                                      :user (select-keys (:user props) [:id :name])}
+                                            :channel-name channel-name}])
                   (reset! state init-state))]
     (fn [props]
       [view {:style {:align-items "center"

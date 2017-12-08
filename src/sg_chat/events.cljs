@@ -17,11 +17,9 @@
  :initialize-db
  (fn [{:keys [db]} _]
    (let [on-success (fn [user]
-                      (dispatch-sync [:set-initialized true])
-                      (when-not (nil? user)
-                        (dispatch-sync [:set-current-screen :main])
-                        (dispatch-sync [:set-user-in-db (u/parse-json user)])
-                        (dispatch [:get-channels-from-firebase])))]
+                      (if-not (nil? user)
+                        (dispatch-sync [:login-user (u/parse-json user)])
+                        (dispatch-sync [:set-initialized true])))]
      {:db app-db
       :get-user-from-local-storage {:on-success on-success
                                     :on-error println}})))
@@ -60,15 +58,19 @@
    (assoc db :user user)))
 
 (reg-event-fx
+ :enter-main-app
+ (fn [{:keys [db]} [_ user]]
+   {:db (assoc db :initialized? true)
+    :dispatch-n [[:set-current-screen :main]
+                 [:get-channels-from-firebase]
+                 [:set-user-in-db user]]}))
+
+(reg-event-fx
  :save-user-in-local-storage
- (fn [{:keys [db]}[_ username]]
-   (let [user {:name username
-               :_id (u/node-uuid)}
-         on-save-success (fn []
-                           (dispatch [:set-current-screen :main])
-                           (dispatch [:get-channels-from-firebase]))
+ (fn [{:keys [db]}[_ user]]
+   (let [on-save-success #(dispatch [:enter-main-app user])
          error-cb #(dispatch [:show-error "Unable to save user"])]
-     {:db (assoc db :user user :reg-btn-loading? true)
+     {:db (assoc db :reg-btn-loading? true)
       :save-user-in-local-storage {:user user
                                    :error-cb error-cb
                                    :success-cb on-save-success}})))
@@ -114,6 +116,7 @@
    (let [existing-messages (or (-> db :messages channel-key) ())
          sorted-messages (->> (seq existing-messages)
                               (cons new-message)
+                              distinct
                               (into []))]
      {:db (-> (update-in db [:messages] assoc channel-key sorted-messages)
               (assoc :fetching? false))})))
@@ -130,12 +133,9 @@
 
 (reg-event-fx
  :send-message
- (fn [{:keys [db]} [_ [channel-name message]]]
-   (let [channel-key (keyword channel-name)
-         channel-messages (or (-> db :messages channel-key) [])
-         updated-messages (concat [message] channel-messages)]
-     {:db db
-      :append-message-to-firebase [channel-name message]})))
+ (fn [{:keys [db]} [_ {:keys [channel-name message]}]]
+   {:db db
+    :append-message-to-firebase [channel-name message]}))
 
 (reg-event-fx
  :add-user-to-firebase
@@ -165,3 +165,8 @@
    (let [usernames (map #(str "@" (:name (second %))) users)]
      (assoc db :username-suggestions usernames))))
 
+
+(reg-event-fx
+ :login-user
+ (fn [_ [_ user]]
+   {:verify-user-creds user}))

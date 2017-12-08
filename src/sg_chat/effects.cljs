@@ -73,8 +73,18 @@
  :check-user-in-firebase
  (fn [user]
    (let [check-response (fn [r]
-                          (println "response  " r)
                           (if (nil? r)
                             (dispatch [:register-user user])
                             (dispatch [:show-error "This username is already taken!"])))]
      (f/check-user-in-firebase user check-response))))
+
+(reg-fx
+ :verify-user-creds
+ (fn [user on-response]
+   (let [on-response (fn [r]
+                       (if (or (nil? r)
+                               (not= (:password user)
+                                     (:password r)))
+                         (dispatch [:show-error "Sorry! Unable to verify user"])
+                         (dispatch [:save-user-in-local-storage user])))]
+     (f/check-user-in-firebase user on-response))))
