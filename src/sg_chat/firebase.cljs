@@ -29,7 +29,7 @@
         (.ref (u/build-fpath (str channel-name "-messages")))
         (.push (clj->js m)))))
 
-(defn get-channel-messages [channel-name on-response hours-before latest-message]
+(defn get-channel-messages [channel-name on-response hours-before]
   (let [ref (-> (.database firebase)
                 (.ref (-> channel-name
                           (str "-messages")

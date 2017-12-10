@@ -41,8 +41,7 @@
                                       u/to-clj)]))]
      (f/get-channel-messages  (:name channel)
                               on-response
-                              c/hours-before
-                              latest-message))))
+                              c/hours-before))))
 
 (reg-fx
  :get-channels-from-firebase
