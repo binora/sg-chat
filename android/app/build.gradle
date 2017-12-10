@@ -146,6 +146,7 @@ versionCodes.get(abi) * 1048576 + defaultConfig.versionCode
 }
 
 dependencies {
+    compile project(':react-native-vector-icons')
     compile project(':react-native-google-analytics-bridge')
 compile project(':react-native-google-analytics-bridge')
 compile project(':react-native-vector-icons')

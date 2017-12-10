@@ -70,7 +70,7 @@
               :style {:background-color c/header-bg-color}}
         (if @db-initialized?
           [animated-text (merge {:style {:font-size 30
-                                         :margin-top "20%"
+                                         :margin-top "10%"
                                          :color "white"}
 
                                  :animation "fadeInDown"})
@@ -82,7 +82,7 @@
                                   :flex-direction "column"
                                   :justify-content "center"}
                           :animation "fadeInUp"}
-           [text-input {:style {:margin-top "30%"
+           [text-input {:style {:margin-top "20%"
                                 :align-self "center"
                                 :border-bottom-width 0.5
                                 :border-bottom-color "white"
@@ -231,11 +231,12 @@
                                       {:on-press #(on-suggestion-tap suggestion hide-panel)}
                                       [text suggestion]]])))
         on-send (fn [channel-name]
-                  (dispatch [:send-message {:message {:text (string/trim (:input @state))
-                                                      :_id (u/node-uuid)
-                                                      :createdAt (u/get-time (js/Date.))
-                                                      :user (select-keys (:user props) [:id :name])}
-                                            :channel-name channel-name}])
+                  (when-not (empty? (:input @state))
+                    (dispatch [:send-message {:message {:text (string/trim (:input @state))
+                                                        :_id (u/node-uuid)
+                                                        :createdAt (u/get-time (js/Date.))
+                                                        :user (select-keys (:user props) [:id :name])}
+                                              :channel-name channel-name}]))
                   (reset! state init-state))]
     (fn [props]
       [view {:style {:align-items "center"
@@ -245,9 +246,9 @@
                      :height 50}}
        [text-input {:on-change-text #(swap! state assoc :input %)
                     :default-value (:input @state)
-                    :style {:width "90%"
-                            :margin-right 10}
+                    :style {:width "90%"}
                     :multiline true
+                    :underline-color-android "transparent"
                     :placeholder "Write a message"}]
        #_[mentions-input {:on-change-text #(swap! state assoc :input %)
                         :trigger "@"
@@ -266,6 +267,7 @@
                         :placeholder "Write a message"}]
        [material-icons {:name "send"
                         :color c/header-bg-color
+                        :style {:margin-right 10}
                         :on-press #(on-send (-> props :channel :name))
                         :size 30}]])))
 
