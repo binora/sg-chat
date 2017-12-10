@@ -66,3 +66,7 @@ figwheel_server.log
 
 # REPL 
 .lein-repl-history
+
+build.sh
+*.apk
+

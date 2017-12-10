@@ -49,6 +49,3 @@
 (def MaterialIcons (.-default (js/require "react-native-vector-icons/MaterialIcons")))
 (def material-icons (r/adapt-react-class MaterialIcons))
 
-(def react-native-mentions (js/require "react-native-mentions"))
-(def mentions-input (-> (.-default react-native-mentions)
-                        r/adapt-react-class))

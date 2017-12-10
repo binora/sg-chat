@@ -7,7 +7,6 @@
                                 button activity-indicator gc-send
                                 keyboard-spacer linking material-icons
                                 animated-text animated-view flat-list
-                                mentions-input
                                 touchable-highlight]]
             [sg-chat.utils :as u]
             [sg-chat.constants :as c]
@@ -75,8 +74,9 @@
 
                                  :animation "fadeInDown"})
            "sg chat"]
-          [activity-indicator {:style {:margin-top "50%"}
-                               :size "large"}])
+          [view {:style {:margin-top "50%"}}
+           [activity-indicator {:color "white"
+                                :size "large"}]])
         (if @db-initialized?
           [animated-view {:style {:width "80%"
                                   :flex-direction "column"
@@ -90,6 +90,7 @@
                                 :width "60%"}
                         :auto-focus true
                         :tint-color "white"
+                        :selection-color "white"
                         :auto-capitalize "none"
                         :placeholder "username"
                         :placeholder-text-color "white"
@@ -106,13 +107,15 @@
                         :secure-text-entry true
                         :auto-capitalize "none"
                         :tint-color "white"
+                        :selection-color "white"
                         :placeholder "password"
                         :placeholder-text-color "white"
                         :underline-color-android "transparent"
                         :text-align "center"
                         :on-change #(on-input-change :password (get-text %))}]
            (if @reg-btn-loading?
-             [activity-indicator]
+             [activity-indicator {:size "large"
+                                  :color "white"}]
              [view {:style {:flex-direction "row"
                             :align-self "center"
                             :justify-content "space-between"
@@ -250,21 +253,6 @@
                     :multiline true
                     :underline-color-android "transparent"
                     :placeholder "Write a message"}]
-       #_[mentions-input {:on-change-text #(swap! state assoc :input %)
-                        :trigger "@"
-                        :trigger-callback trigger-cb
-                        :horizontal false
-                        :style {:width "100%"
-                                :border-width 2}
-                        :suggestions-data (or @username-suggestions [])
-                        :render-suggestions-row render-suggestions-row
-                        :value (or (:input @state) "")
-                        :auto-grow true
-                        :suggestion-row-height 20
-                        :MaxVisibleRowCount 3
-                        :key-extractor #(identity %2)
-                        :trigger-location "new-word-only"
-                        :placeholder "Write a message"}]
        [material-icons {:name "send"
                         :color c/header-bg-color
                         :style {:margin-right 10}

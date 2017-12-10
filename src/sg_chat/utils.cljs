@@ -1,6 +1,6 @@
 (ns sg-chat.utils
   (:require [goog.crypt :as crypt]
-            [goog.crypt.Md5 :as Md5]
+            [goog.crypt.Sha1 :as Sha1]
             [sg-chat.constants :as c]))
 
 (enable-console-print!)
@@ -32,8 +32,13 @@
       (js/Date.)
       (.getTime)))
 
+(defn digest [hasher bytes]
+  (.update hasher bytes)
+  (.digest hasher))
+
 (defn encrypt [input]
   (when-not (nil? input)
-    (->> input
-         (.digest (goog.crypt.Md5.))
+    (->> (crypt/stringToUtf8ByteArray input)
+         (digest (goog.crypt.Sha1.))
          crypt/byteArrayToHex)))
+

@@ -178,5 +178,6 @@
 
 (reg-event-fx
  :login-user
- (fn [_ [_ user]]
-   {:verify-user-creds user}))
+ (fn [{:keys [db]} [_ user]]
+   {:verify-user-creds user
+    :db (assoc db :reg-btn-loading? true)}))
