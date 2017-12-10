@@ -12,7 +12,7 @@
             [sg-chat.utils :as u]
             [sg-chat.constants :as c]
             [sg-chat.subs]
-            [sg-chat.analytics :as analytics]))
+            [sg-chat.analytics :refer [track-screen]]))
 
 (enable-console-print!)
 
@@ -135,6 +135,7 @@
                     :item)
         on-press (fn []
                    (dispatch-sync [:set-current-channel channel])
+                   (track-screen (:name channel))
                    (navigate "Chat" {:title (:name channel)})
                    (dispatch [:open-channel channel]))]
     (r/as-element
@@ -147,6 +148,7 @@
 (defn channels-screen [{:keys [navigation] :as props}]
   (let [{:keys [navigate]} navigation
         on-press (fn [channel]
+                   (track-screen (:name channel))
                    (dispatch-sync [:set-current-channel channel])
                    (navigate "Chat" {:title (:name channel)})
                    (dispatch [:open-channel channel]))
@@ -163,10 +165,13 @@
           (map-indexed (fn [i {:keys [name icon description
                                       font-type] :as channel}]
                          ^{:key i}
+                         [render-channel {:channel channel
+                                          :key i}]
                          [list-item {:key i
                                      :left-icon {:name icon
                                                  :type font-type}
                                      :on-press #(on-press channel)
+                                     :subtitle "hello"
                                      :title name}])
                        @channels)])])))
 
@@ -241,12 +246,13 @@
     (fn [props]
       [view {:style {:align-items "center"
                      :flex-direction "row"
+                     :background-color "white"
                      :width "100%"
-                     :height 40
-                     :margin-bottom 10
-                     :margin-left 5}}
+                     :height 50}}
        [text-input {:on-change-text #(swap! state assoc :input %)
-                    :style {:width "90%"}
+                    :default-value (:input @state)
+                    :style {:width "90%"
+                            :margin-right 10}
                     :multiline true
                     :placeholder "Write a message"}]
        #_[mentions-input {:on-change-text #(swap! state assoc :input %)
@@ -288,8 +294,7 @@
     (fn [props]
       [container
        [view {:style {:width "100%"
-                      :height "100%"
-                      :margin-bottom 20}}
+                      :height "100%"}}
         [flat-list {:data (into-array @messages)
                     :key-extractor #(identity %2)
                     :render-item #(render-message %1 (:name @user))
