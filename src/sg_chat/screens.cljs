@@ -129,31 +129,30 @@
                 "Login"]]])])]])))
 
 
-(defn render-channel [js-item navigate]
-  (let [channel (-> js-item
-                    u/to-clj
-                    :item)
-        on-press (fn []
-                   (dispatch-sync [:set-current-channel channel])
-                   (track-screen (:name channel))
-                   (navigate "Chat" {:title (:name channel)})
-                   (dispatch [:open-channel channel]))]
-    (r/as-element
-     [touchable-highlight {:margin 20
-                           :on-press on-press}
-      [view {:style {:margin 20}}
-       [text (:name channel)]
-       [text (:description channel)]]])))
+(defn render-channel [{:keys [key channel on-select] :as props}]
+  (fn [props]
+    (let [{:keys [icon font-type name]} channel
+          channel-messages (subscribe [:channel-messages name])
+          last-message  (first (or @channel-messages []))
+          {:keys [user text]} last-message]
+      [list-item {:key key
+                  :left-icon {:name icon
+                              :type font-type}
+                  :on-press on-select
+                  :subtitle (if last-message
+                              (str (:name user) ": " text)
+                              "")
+                  :title name}])))
 
 (defn channels-screen [{:keys [navigation] :as props}]
   (let [{:keys [navigate]} navigation
-        on-press (fn [channel]
+        channels (subscribe [:kv :channels])
+        channel-count (count @channels)
+        on-select (fn [channel]
                    (track-screen (:name channel))
                    (dispatch-sync [:set-current-channel channel])
                    (navigate "Chat" {:title (:name channel)})
-                   (dispatch [:open-channel channel]))
-        channels (subscribe [:kv :channels])
-        channel-count (count @channels)]
+                   (dispatch [:open-channel channel]))]
     (fn [props]
       [container
        (if (empty? @channels)
@@ -166,13 +165,8 @@
                                       font-type] :as channel}]
                          ^{:key i}
                          [render-channel {:channel channel
-                                          :key i}]
-                         [list-item {:key i
-                                     :left-icon {:name icon
-                                                 :type font-type}
-                                     :on-press #(on-press channel)
-                                     :subtitle "hello"
-                                     :title name}])
+                                          :on-select #(on-select channel)
+                                          :key i}])
                        @channels)])])))
 
 

@@ -33,7 +33,7 @@
 
 (reg-fx
  :get-channel-messages
- (fn [{:keys [channel latest-message]}]
+ (fn [channel]
    (let [on-response (fn [response]
                        (dispatch [:set-message-in-db
                                   (keyword (:name channel))

@@ -14,14 +14,8 @@
 (reg-sub
  :channel-messages
  (fn [{:keys [messages]} [_ channel-name]]
-
-   (let [channel-messages (or ((keyword channel-name) messages)
-                              [])
-         comparator-fn #(js/Date. (:createdAt %))]
-     (->> channel-messages
-          (sort-by comparator-fn)
-          reverse)
-     channel-messages)))
+   (or ((keyword channel-name) messages)
+       [])))
 
 (reg-sub
  :error

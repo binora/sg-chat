@@ -99,6 +99,11 @@
    (assoc db :current-channel channel)))
 
 (reg-event-fx
+ :get-channel-messages
+ (fn [_ [_ channel]]
+   {:get-channel-messages channel}))
+
+(reg-event-fx
  :open-channel
  (fn [{:keys [db]} [_ channel]]
    (let [channel-key (keyword (:name channel))
@@ -107,8 +112,7 @@
      {:db (if (empty? existing-messages)
             (assoc db :fetching? true)
             db)
-      :get-channel-messages {:channel channel
-                             :latest-message latest-message}})))
+      :dispatch [:get-channel-messages channel]})))
 
 (reg-event-fx
  :set-message-in-db
@@ -124,9 +128,13 @@
 (reg-event-fx
  :set-channels-in-db
  (fn [{:keys [db]} [_ channels]]
-   {:db (assoc db :channels (->> channels
+   (let [formatted-channels (->> channels
                                  (map second)
-                                 (sort-by :position)))}))
+                                 (sort-by :position))]
+     {:db (assoc db :channels formatted-channels)
+      :dispatch-n (->> formatted-channels
+                       (map #(identity [:get-channel-messages %]))
+                       (into []))})))
 
 (reg-event-db
  :set-current-screen
