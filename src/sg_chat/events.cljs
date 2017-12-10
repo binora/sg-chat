@@ -124,7 +124,9 @@
 (reg-event-fx
  :set-channels-in-db
  (fn [{:keys [db]} [_ channels]]
-   {:db (assoc db :channels (map second channels))}))
+   {:db (assoc db :channels (->> channels
+                                 (map second)
+                                 (sort-by :position)))}))
 
 (reg-event-db
  :set-current-screen

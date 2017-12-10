@@ -75,7 +75,8 @@
 
                                  :animation "fadeInDown"})
            "sg chat"]
-          [activity-indicator])
+          [activity-indicator {:style {:margin-top "50%"}
+                               :size "large"}])
         (if @db-initialized?
           [animated-view {:style {:width "80%"
                                   :flex-direction "column"
@@ -240,11 +241,15 @@
     (fn [props]
       [view {:style {:align-items "center"
                      :flex-direction "row"
-                     :justify-content "space-between"
                      :width "100%"
-                     :height 20
+                     :height 40
+                     :margin-bottom 10
                      :margin-left 5}}
-       [mentions-input {:on-change-text #(swap! state assoc :input %)
+       [text-input {:on-change-text #(swap! state assoc :input %)
+                    :style {:width "90%"}
+                    :multiline true
+                    :placeholder "Write a message"}]
+       #_[mentions-input {:on-change-text #(swap! state assoc :input %)
                         :trigger "@"
                         :trigger-callback trigger-cb
                         :horizontal false
