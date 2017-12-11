@@ -3,8 +3,8 @@
             [clojure.string :as string]
             [re-frame.core :refer [subscribe dispatch dispatch-sync]]
             [sg-chat.rn :refer [text view image text-input dimensions
-                                gifted-chat rn-list list-item
-                                button activity-indicator gc-send
+                                rn-list list-item parsed-text
+                                button activity-indicator
                                 keyboard-spacer linking material-icons
                                 animated-text animated-view flat-list
                                 touchable-highlight]]
@@ -186,7 +186,10 @@
         own-message-style {:align-self "flex-end"
                            :margin-right 10
                            :color "white"
-                           :background-color c/header-bg-color}]
+                           :background-color c/header-bg-color}
+        on-url-press (fn [url]
+                       (println url)
+                       (.openURL linking url))]
     (r/as-element
      [view (merge {:flex 1
                    :max-width "40%"
@@ -205,7 +208,10 @@
                         :margin-bottom 5
                         :font-weight "bold"}}
           message-sender])
-       [text  {:style {:color (if own-message? "white" "black")}}
+       [parsed-text {:style {:color (if own-message? "white" "black")}
+                     :parse (clj->js [{:type "url"
+                                       :onPress on-url-press
+                                       :style {:textDecorationLine "underline"}}])}
         (:text message)]]])))
 
 (defn chat-input [props]
@@ -246,10 +252,10 @@
                         (swap! state assoc :height (min 80 (max 50 new-height))))]
     (fn [props]
       [view {:style {:align-items "center"
-                     :flex-direction "row"
-                     :background-color "white"
-                     :width "100%"
-                     :max-height 80}}
+                           :flex-direction "row"
+                           :background-color "white"
+                           :width "100%"
+                           :max-height 80}}
        [text-input {:on-change-text #(swap! state assoc :input %)
                     :default-value (:input @state)
                     :style {:width "90%"
@@ -271,18 +277,7 @@
   (let [user (subscribe [:kv :user])
         fetching? (subscribe [:kv :fetching?])
         channel (subscribe [:kv :current-channel])
-        messages (subscribe [:channel-messages (:name @channel)])
-        parse-patterns (fn [style]
-                         (clj->js [{:type "url"
-                                    :style style
-                                    :onPress #(.openURL linking %)}]))
-        render-send (fn [props]
-                      (r/as-element
-                       [gc-send (js->clj props)
-                        [view {:style {:margin-bottom 5
-                                       :margin-right 10}}
-                         [material-icons {:name "send"
-                                          :size 32}]]]))]
+        messages (subscribe [:channel-messages (:name @channel)])]
     (fn [props]
       [container
        [view {:style {:width "100%"

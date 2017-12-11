@@ -13,17 +13,13 @@
 (def text-input (r/adapt-react-class (.-TextInput ReactNative)))
 (def FlatList (.-FlatList ReactNative))
 (def flat-list (r/adapt-react-class FlatList))
+(def Clipboard (.-Clipboard ReactNative))
 
 (def Alert (.-Alert ReactNative))
 (defn alert [{:keys [title message buttons]}]
   (.alert Alert title message (clj->js buttons)))
 (def activity-indicator (r/adapt-react-class (.-ActivityIndicator ReactNative)))
 (def linking (-> ReactNative .-Linking))
-
-;; gifted chat
-(def react-native-gifted-chat (js/require "react-native-gifted-chat"))
-(def gifted-chat (r/adapt-react-class (.-GiftedChat react-native-gifted-chat)))
-(def gc-send (r/adapt-react-class (.-Send react-native-gifted-chat)))
 
 ;; React navigation
 (defonce ReactNavigation (js/require "react-navigation"))
@@ -48,4 +44,7 @@
 
 (def MaterialIcons (.-default (js/require "react-native-vector-icons/MaterialIcons")))
 (def material-icons (r/adapt-react-class MaterialIcons))
+
+(def parsed-text (r/adapt-react-class (.-default (js/require "react-native-parsed-text"))))
+(def rn-actionsheet (r/adapt-react-class (.-default (js/require "react-native-actionsheet"))))
 
