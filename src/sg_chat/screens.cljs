@@ -210,7 +210,8 @@
 
 (defn chat-input [props]
   (let [init-state  {:input ""
-                     :search-str ""}
+                     :search-str ""
+                     :height 50}
         state (r/atom init-state)
         username-suggestions (subscribe [:kv :username-suggestions])
         trigger-cb (fn [str]
@@ -240,16 +241,23 @@
                                                         :createdAt (u/get-time (js/Date.))
                                                         :user (select-keys (:user props) [:id :name])}
                                               :channel-name channel-name}]))
-                  (reset! state init-state))]
+                  (reset! state init-state))
+        change-height (fn [new-height]
+                        (swap! state assoc :height (min 80 (max 50 new-height))))]
     (fn [props]
       [view {:style {:align-items "center"
                      :flex-direction "row"
                      :background-color "white"
                      :width "100%"
-                     :height 50}}
+                     :max-height 80}}
        [text-input {:on-change-text #(swap! state assoc :input %)
                     :default-value (:input @state)
-                    :style {:width "90%"}
+                    :style {:width "90%"
+                            :height (:height @state)}
+                    :auto-grow true
+                    :on-content-size-change #(change-height (-> %
+                                                                .-nativeEvent
+                                                                .-contentSize .-height))
                     :multiline true
                     :underline-color-android "transparent"
                     :placeholder "Write a message"}]
