@@ -7,6 +7,7 @@
 (def ReactNative (js/require "react-native"))
 (def text (r/adapt-react-class (.-Text ReactNative)))
 (def view (r/adapt-react-class (.-View ReactNative)))
+(def scroll-view (r/adapt-react-class (.-ScrollView ReactNative)))
 (def image (r/adapt-react-class (.-Image ReactNative)))
 (def dimensions (u/to-clj (-> (.-Dimensions ReactNative) (.get "window"))))
 (def touchable-highlight (r/adapt-react-class (.-TouchableHighlight ReactNative)))
@@ -47,3 +48,6 @@
 
 (def parsed-text (r/adapt-react-class (.-default (js/require "react-native-parsed-text"))))
 (def actionsheet (r/adapt-react-class (.-default (js/require "react-native-actionsheet"))))
+
+
+(def input-scroll-view (r/adapt-react-class (.-default (js/require "react-native-input-scroll-view"))))

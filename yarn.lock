@@ -3575,6 +3575,12 @@ react-native-google-analytics-bridge@^5.4.1:
   version "5.4.1"
   resolved "https://registry.yarnpkg.com/react-native-google-analytics-bridge/-/react-native-google-analytics-bridge-5.4.1.tgz#fd5dacb86436b7e08f1972a8205229ada2ea2abf"
 
+react-native-input-scroll-view@^1.6.1:
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/react-native-input-scroll-view/-/react-native-input-scroll-view-1.6.1.tgz#63699a0f0758ba14ea1925f545518bd40b8bed5b"
+  dependencies:
+    prop-types "^15.5.10"
+
 react-native-keyboard-spacer@^0.4.1:
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/react-native-keyboard-spacer/-/react-native-keyboard-spacer-0.4.1.tgz#46f18a320432098a25ea9fa89f5143dd254d332d"

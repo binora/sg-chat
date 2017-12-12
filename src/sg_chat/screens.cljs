@@ -7,7 +7,7 @@
                                 button activity-indicator actionsheet
                                 keyboard-spacer linking material-icons
                                 animated-text animated-view flat-list
-                                touchable-highlight]]
+                                touchable-highlight input-scroll-view]]
             [sg-chat.utils :as u]
             [sg-chat.constants :as c]
             [sg-chat.subs]
@@ -42,6 +42,7 @@
         reg-btn-loading? (subscribe [:kv :reg-btn-loading?])
         state (r/atom {:username ""
                        :password ""})
+        password-ref (atom nil)
         on-input-change (fn [key value]
                           (swap! state assoc key (if (= key :username)
                                                    (string/lower-case value)
@@ -57,7 +58,8 @@
                                  :id (u/node-uuid)})]
                      (if-not invalid-input?
                        (dispatch [event user])
-                       (dispatch [:show-error "Please enter both username and password."]))))]
+                       (dispatch [:show-error "Please enter both username and password."]))))
+        focus-on-password #(.focus @password-ref)]
     (fn [props]
       [container
        [view {:width "100%"
@@ -73,9 +75,9 @@
 
                                  :animation "fadeInDown"})
            "sg chat"]
-          [view {:style {:margin-top "50%"}}
-           [activity-indicator {:color "white"
-                                :size "large"}]])
+          [activity-indicator {:color "white"
+                               :size "large"
+                               :margin-top "50%"}])
         (if @db-initialized?
           [animated-view {:style {:width "80%"
                                   :flex-direction "column"
@@ -88,6 +90,7 @@
                                 :color "white"
                                 :width "60%"}
                         :auto-focus true
+                        :on-submit-editing focus-on-password
                         :tint-color "white"
                         :selection-color "white"
                         :auto-capitalize "none"
@@ -104,6 +107,7 @@
                                 :color "white"
                                 :width "60%"}
                         :secure-text-entry true
+                        :ref (fn [com] (reset! password-ref com))
                         :auto-capitalize "none"
                         :tint-color "white"
                         :selection-color "white"
@@ -259,25 +263,28 @@
         change-height (fn [new-height]
                         (swap! state assoc :height (min 80 (max 50 new-height))))]
     (fn [props]
-      [view {:style {:align-items "center"
-                     :flex-direction "row"
-                     :background-color "white"
+      [view {:style {:background-color "white"
+                     :flex 1
                      :width "100%"
+                     :border-width 1
                      :max-height 80}}
-       [text-input {:on-change-text #(swap! state assoc :input %)
-                    :default-value (:input @state)
-                    :style {:width "90%"
-                            :height (:height @state)}
-                    :auto-grow true
-                    :on-content-size-change #(change-height (-> %
-                                                                .-nativeEvent
-                                                                .-contentSize .-height))
-                    :multiline true
-                    :underline-color-android "transparent"
-                    :placeholder "Write a message"}]
+       [input-scroll-view {:style {:width "80%"
+                                   :border-width 1}}
+        [text-input {:on-change-text #(swap! state assoc :input %)
+                     :default-value (:input @state)
+                     :style {:width "100%"
+                             :border-width 1
+                             :height (:height @state)}
+                     :auto-grow true
+                     :on-content-size-change #(change-height (-> %
+                                                                 .-nativeEvent
+                                                                 .-contentSize .-height))
+                     :multiline true
+                     :underline-color-android "transparent"
+                     :placeholder "Write a message"}]]
        [material-icons {:name "send"
                         :color c/header-bg-color
-                        :style {:margin-right 10}
+                        :style {:align-self "flex-end"}
                         :on-press #(on-send (-> props :channel :name))
                         :size 30}]])))
 
