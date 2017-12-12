@@ -13,7 +13,7 @@
 (def text-input (r/adapt-react-class (.-TextInput ReactNative)))
 (def FlatList (.-FlatList ReactNative))
 (def flat-list (r/adapt-react-class FlatList))
-(def Clipboard (.-Clipboard ReactNative))
+(def clipboard (.-Clipboard ReactNative))
 
 (def Alert (.-Alert ReactNative))
 (defn alert [{:keys [title message buttons]}]
@@ -46,5 +46,5 @@
 (def material-icons (r/adapt-react-class MaterialIcons))
 
 (def parsed-text (r/adapt-react-class (.-default (js/require "react-native-parsed-text"))))
-(def rn-actionsheet (r/adapt-react-class (.-default (js/require "react-native-actionsheet"))))
+(def actionsheet (r/adapt-react-class (.-default (js/require "react-native-actionsheet"))))
 

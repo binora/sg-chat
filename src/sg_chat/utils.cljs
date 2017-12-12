@@ -42,3 +42,5 @@
          (digest (goog.crypt.Sha1.))
          crypt/byteArrayToHex)))
 
+(defn get-text [e]
+  (-> e .-nativeEvent .-text))

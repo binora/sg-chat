@@ -3,8 +3,8 @@
             [clojure.string :as string]
             [re-frame.core :refer [subscribe dispatch dispatch-sync]]
             [sg-chat.rn :refer [text view image text-input dimensions
-                                rn-list list-item parsed-text
-                                button activity-indicator
+                                rn-list list-item parsed-text clipboard
+                                button activity-indicator actionsheet
                                 keyboard-spacer linking material-icons
                                 animated-text animated-view flat-list
                                 touchable-highlight]]
@@ -42,7 +42,6 @@
         reg-btn-loading? (subscribe [:kv :reg-btn-loading?])
         state (r/atom {:username ""
                        :password ""})
-        get-text #(-> % .-nativeEvent .-text)
         on-input-change (fn [key value]
                           (swap! state assoc key (if (= key :username)
                                                    (string/lower-case value)
@@ -96,7 +95,7 @@
                         :placeholder-text-color "white"
                         :underline-color-android "transparent"
                         :text-align "center"
-                        :on-change #(on-input-change :username (get-text %))}]
+                        :on-change #(on-input-change :username (u/get-text %))}]
            [text-input {:style {:margin-top "10%"
                                 :align-self "center"
                                 :margin-bottom "20%"
@@ -112,7 +111,7 @@
                         :placeholder-text-color "white"
                         :underline-color-android "transparent"
                         :text-align "center"
-                        :on-change #(on-input-change :password (get-text %))}]
+                        :on-change #(on-input-change :password (u/get-text %))}]
            (if @reg-btn-loading?
              [activity-indicator {:size "large"
                                   :color "white"}]
@@ -152,10 +151,10 @@
         channels (subscribe [:kv :channels])
         channel-count (count @channels)
         on-select (fn [channel]
-                   (track-screen (:name channel))
-                   (dispatch-sync [:set-current-channel channel])
-                   (navigate "Chat" {:title (:name channel)})
-                   (dispatch [:open-channel channel]))]
+                    (track-screen (:name channel))
+                    (dispatch-sync [:set-current-channel channel])
+                    (navigate "Chat" {:title (:name channel)})
+                    (dispatch [:open-channel channel]))]
     (fn [props]
       [container
        (if (empty? @channels)
@@ -173,7 +172,7 @@
                        @channels)])])))
 
 
-(defn render-message [js-message current-sender]
+(defn render-message [js-message current-sender on-long-press]
   (let [message (-> js-message
                     u/to-clj
                     :item)
@@ -188,7 +187,6 @@
                            :color "white"
                            :background-color c/header-bg-color}
         on-url-press (fn [url]
-                       (println url)
                        (.openURL linking url))]
     (r/as-element
      [view (merge {:flex 1
@@ -211,7 +209,9 @@
        [parsed-text {:style {:color (if own-message? "white" "black")}
                      :parse (clj->js [{:type "url"
                                        :onPress on-url-press
-                                       :style {:textDecorationLine "underline"}}])}
+                                       :onLongPress #(on-long-press (:text message))
+                                       :style {:textDecorationLine "underline"}}])
+                     :on-long-press #(on-long-press (:text message))}
         (:text message)]]])))
 
 (defn chat-input [props]
@@ -252,10 +252,10 @@
                         (swap! state assoc :height (min 80 (max 50 new-height))))]
     (fn [props]
       [view {:style {:align-items "center"
-                           :flex-direction "row"
-                           :background-color "white"
-                           :width "100%"
-                           :max-height 80}}
+                     :flex-direction "row"
+                     :background-color "white"
+                     :width "100%"
+                     :max-height 80}}
        [text-input {:on-change-text #(swap! state assoc :input %)
                     :default-value (:input @state)
                     :style {:width "90%"
@@ -276,15 +276,30 @@
 (defn chat-screen [{:keys [navigation] :as props}]
   (let [user (subscribe [:kv :user])
         fetching? (subscribe [:kv :fetching?])
+        actionsheet-ref (atom nil)
+        selected-text (atom "")
         channel (subscribe [:kv :current-channel])
-        messages (subscribe [:channel-messages (:name @channel)])]
+        messages (subscribe [:channel-messages (:name @channel)])
+        options ["Cancel" "Copy Message" ]
+        copy-btn-index 1
+        on-action (fn [index]
+                    (when (= index copy-btn-index))
+                    (.setString clipboard @selected-text)
+                    (reset! selected-text ""))
+        on-long-press (fn [text]
+                        (reset! selected-text text)
+                        (.show @actionsheet-ref))]
     (fn [props]
       [container
        [view {:style {:width "100%"
                       :height "100%"}}
+        [actionsheet {:options options
+                      :ref (fn [com] (reset! actionsheet-ref com))
+                      :cancel-button-index 0
+                      :on-press on-action}]
         [flat-list {:data (into-array @messages)
                     :key-extractor #(identity %2)
-                    :render-item #(render-message %1 (:name @user))
+                    :render-item #(render-message %1 (:name @user) on-long-press)
                     :inverted true
                     :style {:width "100%"
                             :margin-bottom 10

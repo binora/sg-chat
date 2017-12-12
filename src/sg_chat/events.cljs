@@ -111,8 +111,7 @@
          latest-message (first existing-messages)]
      {:db (if (empty? existing-messages)
             (assoc db :fetching? true)
-            db)
-      :dispatch [:get-channel-messages channel]})))
+            db)})))
 
 (reg-event-fx
  :set-message-in-db
