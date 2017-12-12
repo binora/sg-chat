@@ -186,11 +186,14 @@
                            :margin-right 10
                            :color "white"
                            :background-color c/header-bg-color}
+        message-time (u/moment (:createdAt message))
+        today? (u/today? message-time)
         on-url-press (fn [url]
                        (.openURL linking url))]
     (r/as-element
      [view (merge {:flex 1
-                   :max-width "40%"
+                   :max-width "60%"
+                   :width "30%"
                    :min-width 40
                    :min-height 40
                    :align-items "flex-start"
@@ -200,7 +203,8 @@
                   (if own-message?
                     own-message-style
                     others-message-style))
-      [view {:padding 2}
+      [view {:padding 2
+             :width "100%"}
        (if-not own-message?
          [text {:style {:color "#3D7ED4"
                         :margin-bottom 5
@@ -212,7 +216,11 @@
                                        :onLongPress #(on-long-press (:text message))
                                        :style {:textDecorationLine "underline"}}])
                      :on-long-press #(on-long-press (:text message))}
-        (:text message)]]])))
+        (:text message)]
+       [text {:style {:font-size 8
+                      :align-self (if own-message? "flex-end" "flex-start")
+                      :margin-top 5}}
+        (.format message-time (if today? "[Today at] LT" "ddd, hh:mm a"))]]])))
 
 (defn chat-input [props]
   (let [init-state  {:input ""

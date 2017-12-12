@@ -9,6 +9,7 @@
   "dependencies": {
     "babel-plugin-transform-es2015-block-scoping": "6.15.0",
     "firebase": "^4.7.0",
+    "moment": "^2.19.4",
     "react": "16.0.0",
     "react-native": "0.50.3",
     "react-native-actionsheet": "^2.3.0",

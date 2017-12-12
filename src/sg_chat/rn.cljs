@@ -47,4 +47,3 @@
 
 (def parsed-text (r/adapt-react-class (.-default (js/require "react-native-parsed-text"))))
 (def actionsheet (r/adapt-react-class (.-default (js/require "react-native-actionsheet"))))
-

@@ -6,6 +6,7 @@
 (enable-console-print!)
 
 (def node-uuid (js/require "uuid/v1"))
+(def moment (js/require "moment"))
 
 (defn to-clj [data]
   (js->clj data :keywordize-keys true))
@@ -44,3 +45,10 @@
 
 (defn get-text [e]
   (-> e .-nativeEvent .-text))
+
+
+(defn today?
+  [time]
+  (let [today (moment)
+        input (moment time)]
+    (.isSame today input "day")))
