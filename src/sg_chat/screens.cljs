@@ -228,8 +228,7 @@
 
 (defn chat-input [props]
   (let [init-state  {:input ""
-                     :search-str ""
-                     :height 50}
+                     :search-str ""}
         state (r/atom init-state)
         username-suggestions (subscribe [:kv :username-suggestions])
         trigger-cb (fn [str]
@@ -265,28 +264,24 @@
     (fn [props]
       [view {:style {:background-color "white"
                      :flex 1
-                     :width "100%"
-                     :border-width 1
-                     :max-height 80}}
-       [input-scroll-view {:style {:width "80%"
-                                   :border-width 1}}
+                     :width device-width
+                     :flex-direction "row"
+                     :justify-content "space-between"
+                     :max-height 60}}
+       [input-scroll-view {:style {:width (* 0.85 device-width)}}
         [text-input {:on-change-text #(swap! state assoc :input %)
                      :default-value (:input @state)
-                     :style {:width "100%"
-                             :border-width 1
-                             :height (:height @state)}
+                     :style {:width "100%"}
                      :auto-grow true
-                     :on-content-size-change #(change-height (-> %
-                                                                 .-nativeEvent
-                                                                 .-contentSize .-height))
                      :multiline true
                      :underline-color-android "transparent"
                      :placeholder "Write a message"}]]
        [material-icons {:name "send"
                         :color c/header-bg-color
-                        :style {:align-self "flex-end"}
-                        :on-press #(on-send (-> props :channel :name))
-                        :size 30}]])))
+                        :style {:align-self "center"
+                                :margin-right 10}
+                        :size 30
+                        :on-press #(on-send (-> props :channel :name))}]])))
 
 (defn chat-screen [{:keys [navigation] :as props}]
   (let [user (subscribe [:kv :user])
